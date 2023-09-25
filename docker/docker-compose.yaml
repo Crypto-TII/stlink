@@ -1,0 +1,8 @@
+version: '3'
+services:
+  archlinux-stboard:
+    image: tiicrc/archlinux-stboard:build
+    volumes:
+      - ../:/src
+    command: ["sleep", "infinity"]
+
