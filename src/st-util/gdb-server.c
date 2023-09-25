@@ -42,7 +42,7 @@
 static stlink_t *connected_stlink = NULL;
 static bool semihosting = false;
 static bool serial_specified = false;
-static char serialnumber[28] = {0};
+static char serialnumber[64] = {0};
 
 #if defined(_WIN32)
 #define close_socket win32_close_socket

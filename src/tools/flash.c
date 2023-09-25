@@ -45,8 +45,17 @@ int main(int ac, char** av)
     struct flash_opts o;
     int err = -1;
     uint8_t * mem = NULL;
-
     o.size = 0;
+    FILE *file = fopen("/opt/board/board-serial-fmt.md", "r");
+    char serial_str[STLINK_SERIAL_MAX_SIZE];
+    if (fgets(serial_str, STLINK_SERIAL_MAX_SIZE, file) == NULL) {
+        fprintf(stderr, "Failed to read serial");
+    };
+    fclose(file);
+    size_t len = strlen(serial_str);
+    if (len > 0 && serial_str[len - 1] == '\n') {
+        serial_str[len - 1] = '\0';
+    }
     if (flash_get_opts(&o, ac - 1, av + 1) == -1)
     {
         printf("invalid command line\n");
@@ -55,7 +64,7 @@ int main(int ac, char** av)
     }
 
     printf("st-flash %s\n", STLINK_VERSION);
-
+    strncpy((char *)o.serial, serial_str, STLINK_SERIAL_MAX_SIZE);
     sl = stlink_open_usb(o.log_level, 1, (char *)o.serial, o.freq);
 
     if (sl == NULL) {

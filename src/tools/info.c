@@ -5,6 +5,9 @@
 
 #include <stlink.h>
 
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 static void usage(void)
 {
     puts("st-info --version");
@@ -67,12 +70,35 @@ static void stlink_probe(void)
     size_t size;
 
     size = stlink_probe_usb(&stdevs);
-
     printf("Found %u stlink programmers\n", (unsigned int)size);
-
-    for (size_t n = 0; n < size; n++)
-        stlink_print_info(stdevs[n]);
-
+    FILE *file = fopen("/opt/board/board-serial-fmt.md", "r");
+    if (file == NULL) {
+        fprintf(stderr, "Failed to open serial file\n");
+        return;
+    }
+    char serial_str[STLINK_SERIAL_MAX_SIZE];
+    if (fgets(serial_str, sizeof(serial_str), file) == NULL) {
+        fprintf(stderr, "Failed to read serial\n");
+        fclose(file);
+        return;
+    }
+    size_t len = strlen(serial_str);
+    if (len > 0 && serial_str[len - 1] == '\n') {
+        serial_str[len - 1] = '\0';
+    }
+    fclose(file);
+    for (size_t n = 0; n < size; n++) {
+        if (strcmp((char *)stdevs[n]->serial, serial_str) == 0) {
+            printf(ANSI_COLOR_YELLOW "Connected writeable board *********\n");
+            stlink_print_info(stdevs[n]);
+            printf(" Udev-serial: %s\n", (char *)stdevs[n]->serial);
+            printf(ANSI_COLOR_YELLOW "Connected writeable board *********\n" ANSI_COLOR_RESET);
+        }
+        else {
+            stlink_print_info(stdevs[n]);
+            printf(" Udev-serial: %s\n", (char *)stdevs[n]->serial);
+        }
+    }
     stlink_probe_usb_free(&stdevs, size);
 }
 
