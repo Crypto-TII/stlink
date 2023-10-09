@@ -5,7 +5,7 @@
 MAKEFLAGS += -s
 
 # additional flags for cmake, e.g. install path -DCMAKE_INSTALL_PREFIX=$(HOME)/.local
-CMAKEFLAGS +=
+CMAKEFLAGS += -DCMAKE_C_FLAGS="-framework Security"
 
 all: release
 ci: debug release test
